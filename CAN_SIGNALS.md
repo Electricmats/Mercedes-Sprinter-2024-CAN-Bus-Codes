@@ -8,6 +8,11 @@ Confidence markers used throughout:
 - ⚠️ Uncertain / partially confirmed / conflicting evidence
 - ❌ Not found on this bus / ruled out
 
+**Byte numbering:** 0-indexed from the start of the frame — `byte 0` is the first byte transmitted, `byte 7`
+the last (for an 8-byte frame). This matches the raw hex dump order you'll see in `candump`, PCAN-View,
+SavvyCAN, python-can, etc. — e.g. for `0x33D  1A 2B 03 00 03 00 00 18`, `byte 4 = 0x03` and `byte 7 = 0x18`.
+All bytes not called out for a given frame are either unidentified or rolling counters — ignore them.
+
 ---
 
 ## Engine running — `0x077` ✅
@@ -53,7 +58,27 @@ pedal range), so it's unusable as RPM.
 
 ---
 
-## High beam — `0x33D` ✅
+## Lights frame `0x33D` — byte map
+
+`0x33D` is a single 8-byte frame that carries **three unrelated light signals** at once (high beam, DRL, and
+the welcome-light sub-mode). This is the frame people find confusing, so here's the full byte layout before
+the per-signal detail below:
+
+| Byte | Meaning | Values seen |
+|---|---|---|
+| 0–1 | rolling counter | ignore |
+| 2 | DRL bitmask | `0x00`=off, `0x1F`=DRL (switch), `0x7F`=DRL (welcome mode) |
+| 3 | welcome-mode marker | `0x00` normally, `0x0C` during welcome mode |
+| 4 | high beam | `0x03`=on, `0x00`=off |
+| 5, 6 | inconsistent / not used | see "rejected" notes below |
+| 7 | high beam (bit 3) + welcome-mode bit 1 | `0x18`/`0x10` = high beam on/off; `0x12` = welcome mode |
+
+Worked example — high beam **on**, DRL **off**, frame `0x33D  A3 5C 00 00 03 00 00 18`:
+- byte 2 = `0x00` → DRL off
+- byte 4 = `0x03` and byte 7 = `0x18` → high beam on
+- bytes 0/1 (`A3 5C`) are just the rolling counter for that moment — they'll be different on the next frame
+
+### High beam — ✅
 
 - Byte 4: `0x03` = on, `0x00` = off.
 - Byte 7: `0x18` = on, `0x10` = off (bit 3 toggles).
@@ -68,7 +93,7 @@ hold once, to toggle an auxiliary output without a physical switch. Documented h
 
 ---
 
-## Daytime running light (DRL) — `0x33D` (same frame as high beam) ✅
+### Daytime running light (DRL) — `0x33D` (same frame as high beam) ✅
 
 Byte 2 is a bitmask of light state:
 
