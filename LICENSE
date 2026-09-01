@@ -1,0 +1,20 @@
+Creative Commons CC0 1.0 Universal (Public Domain Dedication)
+
+The person who associated a work with this deed has dedicated the work to
+the public domain by waiving all of his or her rights to the work worldwide
+under copyright law, including all related and neighboring rights, to the
+extent allowed by law.
+
+You can copy, modify, distribute, and use this work, even for commercial
+purposes, all without asking permission.
+
+This applies to the data and documentation in this repository (README.md,
+CAN_SIGNALS.md, sprinter_w907_2024.dbc, and similar files), unless stated
+otherwise.
+
+Full legal text of the CC0 1.0 Universal Public Domain Dedication:
+https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+No warranties are given. The work is provided "as-is" and the reverse
+engineering notes in this repository may contain errors or unconfirmed
+hypotheses -- see CAN_SIGNALS.md for confidence levels per signal.

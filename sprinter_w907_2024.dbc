@@ -1,0 +1,44 @@
+VERSION ""
+
+NS_ :
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+
+BS_:
+
+BU_: SPRINTER
+
+// Mercedes-Benz Sprinter W907/VS30, model year 2024
+// Captured passively (listen-only) on the OBD2 port, pin 6 (CAN-H) / pin 14 (CAN-L), 500 kbps.
+// Only hardware-confirmed signals are included here. See CAN_SIGNALS.md for full notes, caveats,
+// and unconfirmed/rejected hypotheses (outside temperature, coolant, RPM, voltage, per-door status,
+// left/right indicators are intentionally NOT included -- not reliably found on this bus).
+
+BO_ 61 ACCELERATOR_PEDAL: 8 SPRINTER
+ SG_ PEDAL_POSITION : 16|8@1+ (1,0) [0|250] "" SPRINTER
+
+BO_ 119 ENGINE_ACTIVITY: 8 SPRINTER
+ SG_ RUNNING_INDICATOR_LO : 16|8@1+ (1,0) [0|255] "" SPRINTER
+ SG_ RUNNING_INDICATOR_HI : 24|8@1+ (1,0) [0|255] "" SPRINTER
+
+BO_ 775 LOCK_STATUS: 8 SPRINTER
+ SG_ LOCK_ACTIVE_FLAG : 0|8@1+ (1,0) [0|255] "" SPRINTER
+ SG_ LOCK_STATE : 16|8@1+ (1,0) [0|255] "0x11=LOCKED 0x22=UNLOCKED 0x00=IDLE" SPRINTER
+
+BO_ 829 LIGHTS: 8 SPRINTER
+ SG_ DRL_BITMASK : 16|8@1+ (1,0) [0|255] "0x00=off 0x1F=DRL_switch 0x7F=DRL_welcome" SPRINTER
+ SG_ HIGH_BEAM_B4 : 32|8@1+ (1,0) [0|255] "0x03=on 0x00=off" SPRINTER
+ SG_ HIGH_BEAM_B7 : 56|8@1+ (1,0) [0|255] "0x18=on 0x10=off (bit3)" SPRINTER
+
+BO_ 960 FUEL_LEVEL: 8 SPRINTER
+ SG_ FUEL_PERCENT_A : 8|8@1+ (1,0) [0|100] "%" SPRINTER
+ SG_ FUEL_PERCENT_B : 24|8@1+ (1,0) [0|100] "%" SPRINTER
+
+BO_ 346 DOOR_EVENT: 8 SPRINTER
+ SG_ EVENT_MARKER : 32|8@1+ (1,0) [0|255] "0x55=valid event, else noise/baseline" SPRINTER
+ SG_ DOOR_COUNT_RAW : 48|8@1+ (1,0) [0|255] "Unreliable: see CAN_SIGNALS.md, later capture showed 0x20 for every door action regardless of count" SPRINTER
+
+CM_ BO_ 119 "Engine-running is derived from ACTIVITY of this frame (byte 2/3 changing within the last 1500ms), not from these byte values directly. Do not threshold on RUNNING_INDICATOR_* values -- the 'off' sentinel 0x0BB8 also occurs while running. See CAN_SIGNALS.md.";
+CM_ BO_ 346 "Door event trigger only. NOT a reliable per-door or open/closed state -- see CAN_SIGNALS.md, a later capture showed the same event for every door action regardless of which door or open vs closed.";
